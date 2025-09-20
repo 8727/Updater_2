@@ -32,6 +32,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UI));
             this.labelNumber_9 = new System.Windows.Forms.Label();
             this.labelNumber_8 = new System.Windows.Forms.Label();
             this.labelNumber_7 = new System.Windows.Forms.Label();
@@ -65,12 +66,12 @@
             this.UpdateFile = new System.Windows.Forms.GroupBox();
             this.checkSaveSettings = new System.Windows.Forms.CheckBox();
             this.Selects = new System.Windows.Forms.Button();
-            this.textBox = new System.Windows.Forms.TextBox();
-            this.Updates = new System.Windows.Forms.Button();
+            this.fileBox = new System.Windows.Forms.TextBox();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.dataGridView = new System.Windows.Forms.DataGridView();
             this.Updater2 = new System.Windows.Forms.GroupBox();
             this.Save = new System.Windows.Forms.Button();
+            this.Updates = new System.Windows.Forms.Button();
             this.auti.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.maxParallelism)).BeginInit();
             this.RangeIP.SuspendLayout();
@@ -221,6 +222,7 @@
             this.labelUpdate.Size = new System.Drawing.Size(79, 20);
             this.labelUpdate.TabIndex = 29;
             this.labelUpdate.Text = "updates.";
+            this.labelUpdate.MouseHover += new System.EventHandler(this.maxParallelism_MouseHover);
             // 
             // labelNumber
             // 
@@ -234,6 +236,7 @@
             this.labelNumber.Size = new System.Drawing.Size(188, 20);
             this.labelNumber.TabIndex = 28;
             this.labelNumber.Text = "The number of parallel";
+            this.labelNumber.MouseHover += new System.EventHandler(this.maxParallelism_MouseHover);
             // 
             // auti
             // 
@@ -263,6 +266,7 @@
             this.sshPort.TabIndex = 12;
             this.sshPort.Text = "22";
             this.sshPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.sshPort.MouseHover += new System.EventHandler(this.sshPort_MouseHover);
             // 
             // labelSshPort
             // 
@@ -286,6 +290,7 @@
             this.webPort.TabIndex = 10;
             this.webPort.Text = "80";
             this.webPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.webPort.MouseHover += new System.EventHandler(this.webPort_MouseHover);
             // 
             // sshPass
             // 
@@ -298,6 +303,7 @@
             this.sshPass.TabIndex = 3;
             this.sshPass.Text = "user";
             this.sshPass.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.sshPass.MouseHover += new System.EventHandler(this.sshPass_MouseHover);
             // 
             // labelWebPort
             // 
@@ -321,6 +327,7 @@
             this.sshLogin.TabIndex = 2;
             this.sshLogin.Text = "user";
             this.sshLogin.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.sshLogin.MouseHover += new System.EventHandler(this.sshLogin_MouseHover);
             // 
             // LebelPass
             // 
@@ -362,6 +369,7 @@
             this.maxParallelism.TabIndex = 26;
             this.maxParallelism.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
             this.maxParallelism.Value = 5;
+            this.maxParallelism.MouseHover += new System.EventHandler(this.maxParallelism_MouseHover);
             // 
             // RangeIP
             // 
@@ -381,6 +389,7 @@
             // Search
             // 
             this.Search.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.Search.BackgroundImage = global::Updater_2.Properties.Resources.search;
             this.Search.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.Search.FlatAppearance.BorderSize = 0;
             this.Search.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlDarkDark;
@@ -391,6 +400,8 @@
             this.Search.Size = new System.Drawing.Size(80, 80);
             this.Search.TabIndex = 7;
             this.Search.UseVisualStyleBackColor = false;
+            this.Search.Click += new System.EventHandler(this.Search_Click);
+            this.Search.MouseHover += new System.EventHandler(this.Search_MouseHover);
             // 
             // StopIP
             // 
@@ -402,6 +413,7 @@
             this.StopIP.TabIndex = 3;
             this.StopIP.Text = "10.158.1.20";
             this.StopIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.StopIP.MouseHover += new System.EventHandler(this.StopIP_MouseHover);
             // 
             // StartIP
             // 
@@ -413,6 +425,7 @@
             this.StartIP.TabIndex = 2;
             this.StartIP.Text = "10.158.1.2";
             this.StartIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.StartIP.MouseHover += new System.EventHandler(this.StartIP_MouseHover);
             // 
             // LebelStopIP
             // 
@@ -444,12 +457,13 @@
             this.checkBoxFolder.AutoSize = true;
             this.checkBoxFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.checkBoxFolder.ForeColor = System.Drawing.SystemColors.Control;
-            this.checkBoxFolder.Location = new System.Drawing.Point(162, 57);
+            this.checkBoxFolder.Location = new System.Drawing.Point(194, 57);
             this.checkBoxFolder.Name = "checkBoxFolder";
             this.checkBoxFolder.Size = new System.Drawing.Size(180, 29);
             this.checkBoxFolder.TabIndex = 8;
             this.checkBoxFolder.Text = "Folder Update";
             this.checkBoxFolder.UseVisualStyleBackColor = true;
+            this.checkBoxFolder.MouseHover += new System.EventHandler(this.checkBoxFolder_MouseHover);
             // 
             // UpdateFile
             // 
@@ -458,7 +472,7 @@
             this.UpdateFile.Controls.Add(this.checkSaveSettings);
             this.UpdateFile.Controls.Add(this.checkBoxFolder);
             this.UpdateFile.Controls.Add(this.Selects);
-            this.UpdateFile.Controls.Add(this.textBox);
+            this.UpdateFile.Controls.Add(this.fileBox);
             this.UpdateFile.Location = new System.Drawing.Point(627, 2);
             this.UpdateFile.Name = "UpdateFile";
             this.UpdateFile.Size = new System.Drawing.Size(460, 100);
@@ -478,48 +492,40 @@
             this.checkSaveSettings.TabIndex = 21;
             this.checkSaveSettings.Text = "Save settings";
             this.checkSaveSettings.UseVisualStyleBackColor = true;
+            this.checkSaveSettings.CheckedChanged += new System.EventHandler(this.checkSaveSettings_CheckedChanged);
+            this.checkSaveSettings.MouseHover += new System.EventHandler(this.checkSaveSettings_MouseHover);
             // 
             // Selects
             // 
             this.Selects.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Selects.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.Selects.BackgroundImage = global::Updater_2.Properties.Resources.select;
             this.Selects.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.Selects.FlatAppearance.BorderSize = 0;
             this.Selects.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.Selects.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Selects.Location = new System.Drawing.Point(342, 13);
+            this.Selects.Location = new System.Drawing.Point(374, 13);
             this.Selects.Margin = new System.Windows.Forms.Padding(5);
             this.Selects.Name = "Selects";
             this.Selects.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Selects.Size = new System.Drawing.Size(80, 80);
             this.Selects.TabIndex = 6;
             this.Selects.UseVisualStyleBackColor = false;
+            this.Selects.Click += new System.EventHandler(this.Selects_Click);
+            this.Selects.MouseHover += new System.EventHandler(this.Selects_MouseHover);
             // 
-            // textBox
+            // fileBox
             // 
-            this.textBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.fileBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox.Enabled = false;
-            this.textBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.textBox.Location = new System.Drawing.Point(12, 21);
-            this.textBox.Name = "textBox";
-            this.textBox.Size = new System.Drawing.Size(319, 26);
-            this.textBox.TabIndex = 0;
-            this.textBox.Text = "Select the file to update.";
-            // 
-            // Updates
-            // 
-            this.Updates.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.Updates.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.Updates.FlatAppearance.BorderSize = 0;
-            this.Updates.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.Updates.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Updates.Location = new System.Drawing.Point(104, 13);
-            this.Updates.Margin = new System.Windows.Forms.Padding(5);
-            this.Updates.Name = "Updates";
-            this.Updates.Size = new System.Drawing.Size(80, 80);
-            this.Updates.TabIndex = 6;
-            this.Updates.UseVisualStyleBackColor = false;
+            this.fileBox.Enabled = false;
+            this.fileBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.fileBox.Location = new System.Drawing.Point(12, 21);
+            this.fileBox.Name = "fileBox";
+            this.fileBox.Size = new System.Drawing.Size(319, 26);
+            this.fileBox.TabIndex = 0;
+            this.fileBox.Text = "Select the file to update.";
+            this.fileBox.MouseHover += new System.EventHandler(this.fileBox_MouseHover);
             // 
             // progressBar
             // 
@@ -527,9 +533,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar.Location = new System.Drawing.Point(8, 667);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(1515, 30);
+            this.progressBar.Size = new System.Drawing.Size(1515, 25);
             this.progressBar.Step = 1;
             this.progressBar.TabIndex = 25;
+            this.progressBar.MouseHover += new System.EventHandler(this.progressBar_MouseHover);
             // 
             // dataGridView
             // 
@@ -570,6 +577,7 @@
             this.dataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dataGridView.Size = new System.Drawing.Size(1515, 551);
             this.dataGridView.TabIndex = 24;
+            this.dataGridView.MouseHover += new System.EventHandler(this.dataGridView_MouseHover);
             // 
             // Updater2
             // 
@@ -585,6 +593,7 @@
             // Save
             // 
             this.Save.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.Save.BackgroundImage = global::Updater_2.Properties.Resources.save;
             this.Save.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.Save.FlatAppearance.BorderSize = 0;
             this.Save.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlDarkDark;
@@ -595,6 +604,25 @@
             this.Save.Size = new System.Drawing.Size(80, 80);
             this.Save.TabIndex = 7;
             this.Save.UseVisualStyleBackColor = false;
+            this.Save.Click += new System.EventHandler(this.Save_Click);
+            this.Save.MouseHover += new System.EventHandler(this.Save_MouseHover);
+            // 
+            // Updates
+            // 
+            this.Updates.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.Updates.BackgroundImage = global::Updater_2.Properties.Resources.update;
+            this.Updates.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.Updates.FlatAppearance.BorderSize = 0;
+            this.Updates.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.Updates.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Updates.Location = new System.Drawing.Point(104, 13);
+            this.Updates.Margin = new System.Windows.Forms.Padding(5);
+            this.Updates.Name = "Updates";
+            this.Updates.Size = new System.Drawing.Size(80, 80);
+            this.Updates.TabIndex = 6;
+            this.Updates.UseVisualStyleBackColor = false;
+            this.Updates.Click += new System.EventHandler(this.Updates_Click);
+            this.Updates.MouseHover += new System.EventHandler(this.Updates_MouseHover);
             // 
             // UI
             // 
@@ -621,7 +649,7 @@
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.dataGridView);
             this.Controls.Add(this.Updater2);
-            this.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1548, 737);
             this.Name = "UI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -675,7 +703,7 @@
         private System.Windows.Forms.GroupBox UpdateFile;
         private System.Windows.Forms.CheckBox checkSaveSettings;
         private System.Windows.Forms.Button Selects;
-        private System.Windows.Forms.TextBox textBox;
+        private System.Windows.Forms.TextBox fileBox;
         private System.Windows.Forms.Button Updates;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.DataGridView dataGridView;
