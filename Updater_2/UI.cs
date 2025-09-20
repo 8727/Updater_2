@@ -312,7 +312,7 @@ namespace Updater_2
                             await resource.WaitAsync();
                             try
                             {
-                                await UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
+                                //await UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
                             }
                             finally
                             {
@@ -344,7 +344,7 @@ namespace Updater_2
                             await resource.WaitAsync();
                             try
                             {
-                                await UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
+                                //await UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
                             }
                             finally
                             {
