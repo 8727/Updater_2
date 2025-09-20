@@ -88,7 +88,7 @@ namespace Updater_2
                 tasks[i] = NameComplex(computersList.ElementAt<string>(i), webPort);
             }
             Task.WaitAll(tasks);
-            UI.UiUnLock();
+            UI.UI_UnLock();
             UI.FullProgressBar();
             UI.AddDataGridView();
 

@@ -2,7 +2,10 @@
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Updater_2
 {
@@ -26,7 +29,7 @@ namespace Updater_2
         public static Hashtable Camera = new Hashtable();
 
 
-        public static void UiLock()
+        public static void UI_Lock()
         {
             UI_Forms.menuEnable = false;
             UI_Forms.StartIP.Enabled = false;
@@ -41,7 +44,7 @@ namespace Updater_2
            // UI_Forms.dataGridView.Enabled = false;
         }
 
-        public static void UiUnLock()
+        public static void UI_UnLock()
         {
             UI_Forms.menuEnable = true;
             UI_Forms.StartIP.Enabled = true;
@@ -77,7 +80,7 @@ namespace Updater_2
                 {
                     if (obj.Substring(obj.LastIndexOf('.')) == ".xml")
                     {
-                        UiLock();
+                        UI_Lock();
 
                         progressBar.Value = 0;
                         dataGridView.Columns.Clear();
@@ -155,6 +158,21 @@ namespace Updater_2
             }
         }
 
+        void AddFileDataGridView(string name)
+        {
+            if (dataGridView.Columns.Contains(name)) return;
+
+            var newCol = new DataGridViewTextBoxColumn
+            {
+                Name = name,
+                HeaderText = name,
+                MinimumWidth = 100,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells,
+                ReadOnly = true
+            };
+            dataGridView.Columns.Add(newCol);
+        }
+
         void checkSaveSettings_CheckedChanged(object sender, EventArgs e)
         {
             if (!checkSaveSettings.Checked)
@@ -203,7 +221,7 @@ namespace Updater_2
                 return;
             }
             Camera.Clear();
-            UiLock();
+            UI_Lock();
 
             SearchFactor.IpSearch(StartIP.Text, StopIP.Text, webPort.Text);
         }
@@ -262,9 +280,120 @@ namespace Updater_2
             }
         }
 
-        void Updates_Click(object sender, EventArgs e)
+        async void Updates_Click(object sender, EventArgs e)
         {
+            if (!menuEnable)
+            {
+                MessageBox.Show("Update in progress.", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            UI_Lock();
+            progressBar.Value = 0;
+            if (dataGridView.RowCount != 0)
+            {
+                if (checkBoxFolder.Checked)
+                {
+                    string[] patterns = { "*.tar.gz", "*.deb", "*.sh" };
+                    string[] files = patterns.SelectMany(pattern => Directory.GetFiles(Application.StartupPath, pattern, SearchOption.AllDirectories)).Distinct().OrderBy(file => Path.GetFileName(file)).ToArray();
 
+                    if (files.Count() != 0)
+                    {
+                        foreach (string file in files)
+                        {
+                            AddFileDataGridView(file.Substring(file.LastIndexOf('\\') + 1));
+                        }
+
+                        progressBar.Maximum = dataGridView.Rows.Count * files.Count();
+
+                        var resource = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
+
+                        var tasks = Enumerable.Range(0, dataGridView.Rows.Count).Select(async row =>
+                        {
+                            await resource.WaitAsync();
+                            try
+                            {
+                                await UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
+                            }
+                            finally
+                            {
+                                resource.Release();
+                            }
+                        });
+
+                        await Task.WhenAll(tasks);
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("No file to update", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        UI_UnLock();
+                        return;
+                    }
+                }
+                else
+                {
+                    if (filePath != "")
+                    {
+                        AddFileDataGridView(fileBox.Text);
+                        progressBar.Maximum = dataGridView.Rows.Count;
+
+                        var resource = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
+
+                        var tasks = Enumerable.Range(0, dataGridView.Rows.Count).Select(async row =>
+                        {
+                            await resource.WaitAsync();
+                            try
+                            {
+                                await UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
+                            }
+                            finally
+                            {
+                                resource.Release();
+                            }
+                        });
+
+                        await Task.WhenAll(tasks);
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("No file to update", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        UI_UnLock();
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("There are no complexes to update.", "Complexes to update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                UI_UnLock();
+                return;
+            }
+
+            progressBar.Value = progressBar.Maximum;
+
+            if (MessageBox.Show("Save the list of updated complexes.", "Complexes to update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                string fileName = "Updates result " + DateTime.Now.ToString("dd.MM.yyyy HH.mm");
+                FileInfo fil = new FileInfo(Application.StartupPath + "\\" + fileName + ".csv");
+                using (StreamWriter sw = fil.AppendText())
+                {
+                    var headers = dataGridView.Columns.Cast<DataGridViewColumn>();
+                    sw.WriteLine(string.Join(";", headers.Select(column => "\"" + column.HeaderText + "\"").ToArray()));
+                    sw.Close();
+                }
+                using (StreamWriter sw = fil.AppendText())
+                {
+                    foreach (DataGridViewRow row in dataGridView.Rows)
+                    {
+                        var cells = row.Cells.Cast<DataGridViewCell>();
+                        sw.WriteLine(string.Join(";", cells.Select(cell => "\"" + cell.Value + "\"").ToArray()));
+                    }
+                    sw.Close();
+                }
+            }
+
+            UI_UnLock();
         }
 
         void UI_MouseHover(object sender, EventArgs e)
@@ -272,12 +401,12 @@ namespace Updater_2
             toolTip.SetToolTip(StartIP, "Start address for search.");
             toolTip.SetToolTip(StopIP, "Final address to search for.");
             toolTip.SetToolTip(Search, "Starting a search.");
-            toolTip.SetToolTip(sshLogin, "xxx.");
-            toolTip.SetToolTip(sshPass, "xxx.");
-            toolTip.SetToolTip(webPort, "xxx.");
-            toolTip.SetToolTip(sshPort, "xxx.");
+            toolTip.SetToolTip(sshLogin, "SSH access login.");
+            toolTip.SetToolTip(sshPass, "SSH access password.");
+            toolTip.SetToolTip(webPort, "Web port.");
+            toolTip.SetToolTip(sshPort, "SSH port.");
             //toolTip.SetToolTip(fileBox, "xxx.");
-            toolTip.SetToolTip(checkSaveSettings, "xxx.");
+            toolTip.SetToolTip(checkSaveSettings, "Preserve settings when updating.");
             //toolTip.SetToolTip(dataGridView, "xxx.");
             toolTip.SetToolTip(checkBoxFolder, "Update from the program folder or the selected file.");
             toolTip.SetToolTip(Selects, "Select a file to update.");

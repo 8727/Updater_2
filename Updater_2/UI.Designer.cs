@@ -576,6 +576,8 @@
             this.dataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dataGridView.Size = new System.Drawing.Size(1515, 551);
             this.dataGridView.TabIndex = 24;
+            this.dataGridView.DragDrop += new System.Windows.Forms.DragEventHandler(this.Drop_DragDrop);
+            this.dataGridView.DragEnter += new System.Windows.Forms.DragEventHandler(this.Drop_DragEnter);
             // 
             // Updater2
             // 
