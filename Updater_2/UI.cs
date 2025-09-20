@@ -38,7 +38,7 @@ namespace Updater_2
             UI_Forms.checkSaveSettings.Enabled = false;
             UI_Forms.checkBoxFolder.Enabled = false;
             UI_Forms.maxParallelism.Enabled = false;
-            UI_Forms.dataGridView.Enabled = false;
+           // UI_Forms.dataGridView.Enabled = false;
         }
 
         public static void UiUnLock()
@@ -53,7 +53,7 @@ namespace Updater_2
             UI_Forms.checkSaveSettings.Enabled = true;
             UI_Forms.checkBoxFolder.Enabled = true;
             UI_Forms.maxParallelism.Enabled = true;
-            UI_Forms.dataGridView.Enabled = true;
+            //UI_Forms.dataGridView.Enabled = true;
         }
 
         void Drop_DragEnter(object sender, DragEventArgs e)
@@ -155,7 +155,7 @@ namespace Updater_2
             }
         }
 
-        private void checkSaveSettings_CheckedChanged(object sender, EventArgs e)
+        void checkSaveSettings_CheckedChanged(object sender, EventArgs e)
         {
             if (!checkSaveSettings.Checked)
             {
@@ -169,7 +169,6 @@ namespace Updater_2
                 }
             }
         }
-
 
         void Search_Click(object sender, EventArgs e)
         {
@@ -214,6 +213,11 @@ namespace Updater_2
             if (!menuEnable)
             {
                 MessageBox.Show("Update in progress.", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (checkBoxFolder.Checked)
+            {
+                MessageBox.Show("Selected to load files from folder.", "Selected file to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
@@ -263,86 +267,35 @@ namespace Updater_2
 
         }
 
-
-
-
-        private void StartIP_MouseHover(object sender, EventArgs e)
+        void UI_MouseHover(object sender, EventArgs e)
         {
             toolTip.SetToolTip(StartIP, "Start address for search.");
-        }
-
-        private void StopIP_MouseHover(object sender, EventArgs e)
-        {
             toolTip.SetToolTip(StopIP, "Final address to search for.");
-        }
-
-        private void Search_MouseHover(object sender, EventArgs e)
-        {
             toolTip.SetToolTip(Search, "Starting a search.");
-        }
-
-        private void sshLogin_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void sshPass_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void webPort_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void sshPort_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void fileBox_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void checkSaveSettings_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void dataGridView_MouseHover(object sender, EventArgs e)
-        {
-            toolTip.SetToolTip(Search, "xxx.");
-        }
-
-        private void checkBoxFolder_MouseHover(object sender, EventArgs e)
-        {
+            toolTip.SetToolTip(sshLogin, "xxx.");
+            toolTip.SetToolTip(sshPass, "xxx.");
+            toolTip.SetToolTip(webPort, "xxx.");
+            toolTip.SetToolTip(sshPort, "xxx.");
+            //toolTip.SetToolTip(fileBox, "xxx.");
+            toolTip.SetToolTip(checkSaveSettings, "xxx.");
+            //toolTip.SetToolTip(dataGridView, "xxx.");
             toolTip.SetToolTip(checkBoxFolder, "Update from the program folder or the selected file.");
-        }
-
-        private void Selects_MouseHover(object sender, EventArgs e)
-        {
             toolTip.SetToolTip(Selects, "Select a file to update.");
-        }
-
-        private void Save_MouseHover(object sender, EventArgs e)
-        {
             toolTip.SetToolTip(Save, "Saving the update table.");
-        }
-
-        private void Updates_MouseHover(object sender, EventArgs e)
-        {
             toolTip.SetToolTip(Updates, "Starting the update.");
-        }
-
-        private void maxParallelism_MouseHover(object sender, EventArgs e)
-        {
+            toolTip.SetToolTip(labelNumber, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelUpdate, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_1, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_2, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_3, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_4, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_5, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_6, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_7, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_8, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_9, "The number of parallel updates is from 1 to 10.");
+            toolTip.SetToolTip(labelNumber_10, "The number of parallel updates is from 1 to 10.");
             toolTip.SetToolTip(maxParallelism, "The number of parallel updates is from 1 to 10.");
-        }
-
-        private void progressBar_MouseHover(object sender, EventArgs e)
-        {
             toolTip.SetToolTip(progressBar, "Progress bar for searching for complexes or performing updates.");
         }
 

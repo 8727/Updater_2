@@ -222,7 +222,7 @@
             this.labelUpdate.Size = new System.Drawing.Size(79, 20);
             this.labelUpdate.TabIndex = 29;
             this.labelUpdate.Text = "updates.";
-            this.labelUpdate.MouseHover += new System.EventHandler(this.maxParallelism_MouseHover);
+            this.labelUpdate.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // labelNumber
             // 
@@ -236,7 +236,7 @@
             this.labelNumber.Size = new System.Drawing.Size(188, 20);
             this.labelNumber.TabIndex = 28;
             this.labelNumber.Text = "The number of parallel";
-            this.labelNumber.MouseHover += new System.EventHandler(this.maxParallelism_MouseHover);
+            this.labelNumber.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // auti
             // 
@@ -266,7 +266,7 @@
             this.sshPort.TabIndex = 12;
             this.sshPort.Text = "22";
             this.sshPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.sshPort.MouseHover += new System.EventHandler(this.sshPort_MouseHover);
+            this.sshPort.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // labelSshPort
             // 
@@ -290,7 +290,7 @@
             this.webPort.TabIndex = 10;
             this.webPort.Text = "80";
             this.webPort.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.webPort.MouseHover += new System.EventHandler(this.webPort_MouseHover);
+            this.webPort.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // sshPass
             // 
@@ -303,7 +303,7 @@
             this.sshPass.TabIndex = 3;
             this.sshPass.Text = "user";
             this.sshPass.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.sshPass.MouseHover += new System.EventHandler(this.sshPass_MouseHover);
+            this.sshPass.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // labelWebPort
             // 
@@ -327,7 +327,7 @@
             this.sshLogin.TabIndex = 2;
             this.sshLogin.Text = "user";
             this.sshLogin.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.sshLogin.MouseHover += new System.EventHandler(this.sshLogin_MouseHover);
+            this.sshLogin.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // LebelPass
             // 
@@ -369,7 +369,7 @@
             this.maxParallelism.TabIndex = 26;
             this.maxParallelism.TickStyle = System.Windows.Forms.TickStyle.TopLeft;
             this.maxParallelism.Value = 5;
-            this.maxParallelism.MouseHover += new System.EventHandler(this.maxParallelism_MouseHover);
+            this.maxParallelism.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // RangeIP
             // 
@@ -401,7 +401,7 @@
             this.Search.TabIndex = 7;
             this.Search.UseVisualStyleBackColor = false;
             this.Search.Click += new System.EventHandler(this.Search_Click);
-            this.Search.MouseHover += new System.EventHandler(this.Search_MouseHover);
+            this.Search.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // StopIP
             // 
@@ -411,9 +411,9 @@
             this.StopIP.Name = "StopIP";
             this.StopIP.Size = new System.Drawing.Size(147, 26);
             this.StopIP.TabIndex = 3;
-            this.StopIP.Text = "10.158.1.20";
+            this.StopIP.Text = "10.5.127.30";
             this.StopIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.StopIP.MouseHover += new System.EventHandler(this.StopIP_MouseHover);
+            this.StopIP.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // StartIP
             // 
@@ -423,9 +423,9 @@
             this.StartIP.Name = "StartIP";
             this.StartIP.Size = new System.Drawing.Size(147, 26);
             this.StartIP.TabIndex = 2;
-            this.StartIP.Text = "10.158.1.2";
+            this.StartIP.Text = "10.5.127.1";
             this.StartIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.StartIP.MouseHover += new System.EventHandler(this.StartIP_MouseHover);
+            this.StartIP.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // LebelStopIP
             // 
@@ -463,7 +463,7 @@
             this.checkBoxFolder.TabIndex = 8;
             this.checkBoxFolder.Text = "Folder Update";
             this.checkBoxFolder.UseVisualStyleBackColor = true;
-            this.checkBoxFolder.MouseHover += new System.EventHandler(this.checkBoxFolder_MouseHover);
+            this.checkBoxFolder.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // UpdateFile
             // 
@@ -493,7 +493,7 @@
             this.checkSaveSettings.Text = "Save settings";
             this.checkSaveSettings.UseVisualStyleBackColor = true;
             this.checkSaveSettings.CheckedChanged += new System.EventHandler(this.checkSaveSettings_CheckedChanged);
-            this.checkSaveSettings.MouseHover += new System.EventHandler(this.checkSaveSettings_MouseHover);
+            this.checkSaveSettings.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // Selects
             // 
@@ -512,7 +512,7 @@
             this.Selects.TabIndex = 6;
             this.Selects.UseVisualStyleBackColor = false;
             this.Selects.Click += new System.EventHandler(this.Selects_Click);
-            this.Selects.MouseHover += new System.EventHandler(this.Selects_MouseHover);
+            this.Selects.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // fileBox
             // 
@@ -522,10 +522,9 @@
             this.fileBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.fileBox.Location = new System.Drawing.Point(12, 21);
             this.fileBox.Name = "fileBox";
-            this.fileBox.Size = new System.Drawing.Size(319, 26);
+            this.fileBox.Size = new System.Drawing.Size(354, 26);
             this.fileBox.TabIndex = 0;
             this.fileBox.Text = "Select the file to update.";
-            this.fileBox.MouseHover += new System.EventHandler(this.fileBox_MouseHover);
             // 
             // progressBar
             // 
@@ -536,7 +535,7 @@
             this.progressBar.Size = new System.Drawing.Size(1515, 25);
             this.progressBar.Step = 1;
             this.progressBar.TabIndex = 25;
-            this.progressBar.MouseHover += new System.EventHandler(this.progressBar_MouseHover);
+            this.progressBar.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // dataGridView
             // 
@@ -577,7 +576,6 @@
             this.dataGridView.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dataGridView.Size = new System.Drawing.Size(1515, 551);
             this.dataGridView.TabIndex = 24;
-            this.dataGridView.MouseHover += new System.EventHandler(this.dataGridView_MouseHover);
             // 
             // Updater2
             // 
@@ -605,7 +603,7 @@
             this.Save.TabIndex = 7;
             this.Save.UseVisualStyleBackColor = false;
             this.Save.Click += new System.EventHandler(this.Save_Click);
-            this.Save.MouseHover += new System.EventHandler(this.Save_MouseHover);
+            this.Save.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // Updates
             // 
@@ -622,7 +620,7 @@
             this.Updates.TabIndex = 6;
             this.Updates.UseVisualStyleBackColor = false;
             this.Updates.Click += new System.EventHandler(this.Updates_Click);
-            this.Updates.MouseHover += new System.EventHandler(this.Updates_MouseHover);
+            this.Updates.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
             // UI
             // 
