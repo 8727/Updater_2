@@ -1,130 +1,242 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
-using System;
 using Renci.SshNet;
-using System.Threading;
-using System.Linq;
 using System.Web.Script.Serialization;
 
 namespace Updater_2
 {
     internal class Shh_UpdateFactor
     {
-        private const int MaxAttempts = 5;
-        private const int DelayMs = 500;
+        const int MaxAttempts = 5;
+        const int DelayMs = 500;
 
-        private static async Task<string> ExecuteSshCommand(SshClient ssh, string command)
+        static async Task<bool> UploadFileViaSftp(string ipAddress, string localFilePath, string remotePath, int rowIndex, string fileName)
         {
-            var cmd = ssh.RunCommand(command);
-            return cmd.Result;
+            try
+            {
+                using (var sftp = new SftpClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
+                {
+                    sftp.Connect();
+
+                    // Ensure remote directory exists
+                    var remoteDir = Path.GetDirectoryName(remotePath);
+                    if (!sftp.Exists(remoteDir))
+                    {
+                        sftp.CreateDirectory(remoteDir);
+                    }
+
+                    // Upload file with progress tracking
+                    using (var fileStream = new FileStream(localFilePath, FileMode.Open))
+                    {
+                        var fileInfo = new FileInfo(localFilePath);
+                        long fileSize = fileInfo.Length;
+                        long transferred = 0;
+
+                        var asyncResult = sftp.BeginUploadFile(fileStream, remotePath);
+
+                        // Progress monitoring
+                        while (!asyncResult.IsCompleted)
+                        {
+                            await Task.Delay(100);
+                            transferred = fileStream.Position;
+                            double progress = (double)transferred / fileSize * 100;
+                            UI.StatusDataGridView(rowIndex, fileName, $"Uploading... {progress:F1}%", Color.Yellow);
+                        }
+
+                        sftp.EndUploadFile(asyncResult);
+                    }
+
+                    sftp.Disconnect();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                UI.StatusDataGridView(rowIndex, fileName, $"Uploading Error: {ex.Message}", Color.Red);
+                return false;
+            }
         }
 
-        private static async Task<bool> CheckStateAsync(string ipAddress, int rowIndex, string fileName)
+        static string GetStateAsync(string ipAddress)
         {
             try
             {
                 using (var ssh = new SshClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
                 {
                     ssh.Connect();
-                    string response = await ExecuteSshCommand(ssh,
-                        $"curl -s http://{ipAddress}:{UI.web_port}/updater/state");
+                    var command = ssh.RunCommand($"curl -s http://127.0.0.1/updater/state");
+                    ssh.Disconnect();
 
-                    var serializer = new JavaScriptSerializer();
-                    var stateObj = serializer.Deserialize<dynamic>(response);
-                    string state = stateObj["stage"];
+                    // Simple JSON parsing to extract the "stage" value
+                    var response = command.Result;
+                    return new JavaScriptSerializer().Deserialize<dynamic>(response)["stage"];
 
-                    if (state != "notStarted")
+                }
+            }
+            catch
+            {
+                return "undefined";
+            }
+        }
+
+        static void SendCancelCommand(string ipAddress, int rowIndex, string fileName)
+        {
+            try
+            {
+                using (var ssh = new SshClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
+                {
+                    ssh.Connect();
+                    var command = ssh.RunCommand(
+                        "curl -X POST -H \"accept: text/plain\" " +
+                        "-H \"Content-Type: multipart/form-data\" " +
+                        "-F \"dummy= \" \"http://127.0.0.1/updater/cancel\""
+                    );
+                    ssh.Disconnect();
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        static async Task<bool> ExecuteWebInstall(string ipAddress, string remoteTempPath, int rowIndex, string fileName)
+        {
+            string state = "undefined";
+            for (int attempt = 0; attempt < MaxAttempts; attempt++)
+            {
+                state = GetStateAsync(ipAddress);
+                if (state == "notStarted") break;
+                await Task.Delay(DelayMs);
+            }
+
+            if (state != "notStarted")
+            {
+                UI.StatusDataGridView(rowIndex, fileName, "Not Available...", Color.Red);
+                return false;
+            }
+
+            bool uploadSuccess = false;
+            for (int attempt = 0; attempt < MaxAttempts; attempt++)
+            {
+                try
+                {
+                    using (var ssh = new SshClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
                     {
-                        UI.StatusDataGridView(rowIndex, fileName, "Not Available...", Color.Red);
+                        ssh.Connect();
+                        var command = ssh.CreateCommand($"curl -F \"file=@{remoteTempPath}\" http://127.0.0.1/updater/upload --progress-bar");
+                        var asyncResult = command.BeginExecute();
+
+                        using (var reader = new StreamReader(command.OutputStream))
+                        {
+                            while (!asyncResult.IsCompleted)
+                            {
+                                var line = await reader.ReadLineAsync();
+                                if (line != null && line.Contains("%"))
+                                {
+                                    UI.StatusDataGridView(rowIndex, fileName, $"Uploading Web... {line.Trim()}", Color.Yellow);
+                                }
+                                await Task.Delay(100);
+                            }
+                        }
+
+                        command.EndExecute(asyncResult);
+                        uploadSuccess = command.ExitStatus == 0;
+                        ssh.Disconnect();
+                        if (uploadSuccess) break;
+                    }
+                }
+                catch
+                {
+                    if (attempt == MaxAttempts - 1)
+                    {
+                        SendCancelCommand(ipAddress, rowIndex, fileName);
                         return false;
                     }
-                    return true;
                 }
+                await Task.Delay(DelayMs);
             }
-            catch (Exception ex)
+
+            if (!uploadSuccess)
             {
-                UI.StatusDataGridView(rowIndex, fileName, $"State Check Error: {ex.Message}", Color.Red);
+                SendCancelCommand(ipAddress, rowIndex, fileName);
+                UI.StatusDataGridView(rowIndex, fileName, "Web Upload Failed", Color.Red);
                 return false;
             }
-        }
 
-        private static async Task<bool> UploadFileViaScp(string ipAddress, string localFilePath, string remotePath, int rowIndex, string fileName)
-        {
-            try
+            bool installSuccess = false;
+            for (int attempt = 0; attempt < MaxAttempts; attempt++)
             {
-                using (var scp = new ScpClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
+                try
                 {
-                    scp.Connect();
-                    var fileInfo = new FileInfo(localFilePath);
-                    long fileSize = fileInfo.Length;
-                    long transferred = 0;
-
-                    scp.Uploading += (sender, e) =>
+                    using (var ssh = new SshClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
                     {
-                        transferred += e.Uploaded;
-                        double progress = (double)transferred / fileSize * 100;
-                        UI.StatusDataGridView(rowIndex, fileName, $"Uploading... {progress:F1}%", Color.Yellow);
-                    };
-
-                    await Task.Run(() => scp.Upload(fileInfo, remotePath));
-                    return true;
+                        ssh.Connect();
+                        var command = ssh.RunCommand(
+                            $"curl -X POST -H \"accept: text/plain\" -H \"Content-Type: multipart/form-data\" " +
+                            $"-F \"dummy=\" \"http://127.0.0.1/updater/install\""
+                        );
+                        installSuccess = command.ExitStatus == 0;
+                        ssh.Disconnect();
+                        if (installSuccess) break;
+                    }
                 }
+                catch
+                {
+                    if (attempt == MaxAttempts - 1)
+                    {
+                        SendCancelCommand(ipAddress, rowIndex, fileName);
+                        return false;
+                    }
+                }
+                await Task.Delay(DelayMs);
             }
-            catch (Exception ex)
+
+            if (!installSuccess)
             {
-                UI.StatusDataGridView(rowIndex, fileName, $"SCP Error: {ex.Message}", Color.Red);
+                SendCancelCommand(ipAddress, rowIndex, fileName);
+                UI.StatusDataGridView(rowIndex, fileName, "Install Failed", Color.Red);
                 return false;
             }
+            UI.StatusDataGridView(rowIndex, fileName, "Installed", Color.Lime);
+            return true;
         }
 
-        private static async Task<bool> ExecuteWebInstall(string ipAddress, int rowIndex, string fileName)
+        static bool CheckArchiveForDataJson(SshClient ssh, string remotePath)
         {
             try
             {
-                using (var ssh = new SshClient(ipAddress, UI.ssh_port, UI.ssh_username, UI.ssh_password))
-                {
-                    ssh.Connect();
-                    var command = ssh.CreateCommand(
-                        $"curl -X POST -H \"accept: text/plain\" -H \"Content-Type: multipart/form-data\" " +
-                        $"-F \"dummy=\" \"http://127.0.0.1/updater/install\""
-                    );
-
-                    var result = await Task.Factory.FromAsync(command.BeginExecute(), command.EndExecute);
-                    return command.ExitStatus == 0;
-                }
+                var command = ssh.RunCommand($"tar -ztf {remotePath} | grep data.json");
+                return command.ExitStatus == 0;
             }
-            catch (Exception ex)
+            catch
             {
-                UI.StatusDataGridView(rowIndex, fileName, $"Install Error: {ex.Message}", Color.Red);
                 return false;
             }
         }
 
-        private static async Task<bool> CheckArchiveForDataJson(SshClient ssh, string remotePath)
+        static bool ExtractArchive(SshClient ssh, string remotePath, string password)
         {
-            var command = ssh.CreateCommand($"tar -ztf {remotePath} | grep data.json");
-            var result = await Task.Factory.FromAsync(command.BeginExecute(), command.EndExecute);
-            return command.ExitStatus == 0;
+            try
+            {
+                var command = ssh.RunCommand($"echo '{password}' | sudo -S tar -xzf {remotePath} -C /");
+                return command.ExitStatus == 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        private static async Task<bool> ExtractArchive(SshClient ssh, string remotePath, string password)
-        {
-            var command = ssh.CreateCommand(
-                $"echo '{password}' | sudo -S tar -xzf {remotePath} -C /"
-            );
-            var result = await Task.Factory.FromAsync(command.BeginExecute(), command.EndExecute);
-            return command.ExitStatus == 0;
-        }
-
-        private static async Task<bool> ProcessFileAsync(string ipAddress, string filePath, int rowIndex)
+        static async Task<bool> ProcessFileAsync(string ipAddress, string filePath, int rowIndex)
         {
             string fileName = Path.GetFileName(filePath);
             string remoteTempPath = $"/tmp/Upload/{fileName}";
 
-            // Upload file
-            if (!await UploadFileViaScp(ipAddress, filePath, remoteTempPath, rowIndex, fileName))
-                return false;
+            UI.StatusDataGridView(rowIndex, fileName, "Uploading...", Color.Yellow);
+            if (!await UploadFileViaSftp(ipAddress, filePath, remoteTempPath, rowIndex, fileName))
+                return false;            
 
             try
             {
@@ -135,10 +247,10 @@ namespace Updater_2
 
                     if (extension == ".tar.gz")
                     {
-                        if (await CheckArchiveForDataJson(ssh, remoteTempPath))
+                        if (CheckArchiveForDataJson(ssh, remoteTempPath))
                         {
                             UI.StatusDataGridView(rowIndex, fileName, "Extracting...", Color.LightGreen);
-                            if (await ExtractArchive(ssh, remoteTempPath, UI.ssh_password))
+                            if (ExtractArchive(ssh, remoteTempPath, UI.ssh_password))
                             {
                                 UI.StatusDataGridView(rowIndex, fileName, "Extracted", Color.Lime);
                                 return true;
@@ -147,26 +259,20 @@ namespace Updater_2
                         }
                         else
                         {
-                            if (!await CheckStateAsync(ipAddress, rowIndex, fileName))
-                                return false;
-
-                            return await ExecuteWebInstall(ipAddress, rowIndex, fileName);
+                            UI.StatusDataGridView(rowIndex, fileName, "Installing via web...", Color.LightGreen);
+                            return await ExecuteWebInstall(ipAddress, remoteTempPath, rowIndex, fileName);
                         }
                     }
                     else if (extension == ".deb")
                     {
-                        var command = ssh.CreateCommand(
-                            $"echo '{UI.ssh_password}' | sudo -S dpkg -i {remoteTempPath}"
-                        );
-                        var result = await Task.Factory.FromAsync(command.BeginExecute(), command.EndExecute);
+                        UI.StatusDataGridView(rowIndex, fileName, "Installing package...", Color.LightGreen);
+                        var command = ssh.RunCommand($"echo '{UI.ssh_password}' | sudo -S dpkg -i {remoteTempPath}");
                         return command.ExitStatus == 0;
                     }
                     else if (extension == ".sh")
                     {
-                        var command = ssh.CreateCommand(
-                            $"chmod +x {remoteTempPath} && echo '{UI.ssh_password}' | sudo -S {remoteTempPath}"
-                        );
-                        var result = await Task.Factory.FromAsync(command.BeginExecute(), command.EndExecute);
+                        UI.StatusDataGridView(rowIndex, fileName, "Running script...", Color.LightGreen);
+                        var command = ssh.RunCommand($"chmod +x {remoteTempPath} && echo '{UI.ssh_password}' | sudo -S {remoteTempPath}");
                         return command.ExitStatus == 0;
                     }
                     else
