@@ -26,7 +26,7 @@ namespace Updater_2
 
         public static UI UI_Forms;
         public bool menuEnable = true;
-        public bool Web_upload = true;
+        public bool Web_upload = false;
 
         string filePath = string.Empty;
         public static Hashtable Camera = new Hashtable();
@@ -377,7 +377,7 @@ namespace Updater_2
                                 }
                                 else
                                 {
-                                    await Web_UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
+                                    await Shh_UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
                                 }
                             }
                             finally
@@ -424,7 +424,7 @@ namespace Updater_2
                                 }
                                 else
                                 {
-                                    await Web_UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
+                                    await Shh_UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
 
                                 }
                             }
