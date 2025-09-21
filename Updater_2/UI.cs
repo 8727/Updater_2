@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Threading;
+using System.Collections;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Updater_2
 {
@@ -25,9 +26,16 @@ namespace Updater_2
 
         public static UI UI_Forms;
         public bool menuEnable = true;
+        public bool Web_upload = true;
+
         string filePath = string.Empty;
         public static Hashtable Camera = new Hashtable();
-
+        public static int ssh_port;
+        public static string ssh_username;
+        public static string ssh_password;
+        public static string web_port;
+        public static bool SaveSettings;
+        public static bool BoxFolder;
 
         public static void UI_Lock()
         {
@@ -57,38 +65,6 @@ namespace Updater_2
             UI_Forms.checkBoxFolder.Enabled = true;
             UI_Forms.maxParallelism.Enabled = true;
             //UI_Forms.dataGridView.Enabled = true;
-        }
-
-        void Drop_DragEnter(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
-                e.Effect = DragDropEffects.Copy;
-            }
-        }
-
-        void Drop_DragDrop(object sender, DragEventArgs e)
-        {
-            if (!menuEnable)
-            {
-                MessageBox.Show("Update in progress.", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            foreach (string obj in (string[])e.Data.GetData(DataFormats.FileDrop))
-            {
-                if (!Directory.Exists(obj))
-                {
-                    if (obj.Substring(obj.LastIndexOf('.')) == ".xml")
-                    {
-                        UI_Lock();
-
-                        progressBar.Value = 0;
-                        dataGridView.Columns.Clear();
-                        Camera.Clear();
-                        SearchFactor.Drop(obj, webPort.Text);
-                    }
-                }
-            }
         }
 
         public static void FactorsAdd(string ip, NameVersion obj)
@@ -158,6 +134,88 @@ namespace Updater_2
             }
         }
 
+        public static void StatusDataGridView(int stroka, string stolb, string status, Color color)
+        {
+            UI_Forms.dataGridView.Rows[stroka].Cells[stolb].Value = status;
+            UI_Forms.dataGridView.Rows[stroka].Cells[stolb].Style.BackColor = color;
+        }
+
+        bool Update_User_Params()
+        {
+            bool hasErrors = false;
+            string pattern = @"^(0|[1-9]\d{0,3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$";
+
+            Func<string, string, bool> validatePort = (portText, connectionType) =>
+            {
+                if (!Regex.IsMatch(portText, pattern))
+                {
+                    MessageBox.Show($"Use the correct port for {connectionType} connections,\nranging from 0 to 65535.", "Invalid port!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return true;
+                }
+                return false;
+            };
+
+            if (validatePort(sshPort.Text, "SSH"))
+            {
+                hasErrors = true;
+            }
+            else
+            {
+                ssh_port = int.Parse(sshPort.Text);
+            }
+
+            ssh_username = sshLogin.Text;
+            ssh_password = sshPass.Text;
+
+            if (validatePort(webPort.Text, "WEB"))
+            {
+                hasErrors = true;
+            }
+
+            web_port = webPort.Text;
+            SaveSettings = checkSaveSettings.Checked;
+            BoxFolder = checkBoxFolder.Checked;
+
+            return hasErrors;
+        }
+
+        void UI_Load(object sender, EventArgs e)
+        {
+            Update_User_Params();
+        }
+
+        void Drop_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        void Drop_DragDrop(object sender, DragEventArgs e)
+        {
+            if (!menuEnable)
+            {
+                MessageBox.Show("Update in progress.", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            foreach (string obj in (string[])e.Data.GetData(DataFormats.FileDrop))
+            {
+                if (!Directory.Exists(obj))
+                {
+                    if (obj.Substring(obj.LastIndexOf('.')) == ".xml")
+                    {
+                        UI_Lock();
+
+                        progressBar.Value = 0;
+                        dataGridView.Columns.Clear();
+                        Camera.Clear();
+                        SearchFactor.Drop(obj, webPort.Text);
+                    }
+                }
+            }
+        }
+
         void AddFileDataGridView(string name)
         {
             if (dataGridView.Columns.Contains(name)) return;
@@ -195,6 +253,10 @@ namespace Updater_2
                 MessageBox.Show("Update in progress.", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            if (Update_User_Params())
+            {
+                return;
+            }
 
             progressBar.Value = 0;
             dataGridView.Columns.Clear();
@@ -223,7 +285,7 @@ namespace Updater_2
             Camera.Clear();
             UI_Lock();
 
-            SearchFactor.IpSearch(StartIP.Text, StopIP.Text, webPort.Text);
+            SearchFactor.IpSearch(StartIP.Text, StopIP.Text, web_port);
         }
 
         void Selects_Click(object sender, EventArgs e)
@@ -287,11 +349,54 @@ namespace Updater_2
                 MessageBox.Show("Update in progress.", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            if (Update_User_Params())
+            {
+                return;
+            }
             UI_Lock();
             progressBar.Value = 0;
             if (dataGridView.RowCount != 0)
             {
-                if (checkBoxFolder.Checked)
+                if (!checkBoxFolder.Checked)
+                {
+                    if (filePath != "")
+                    {
+                        AddFileDataGridView(fileBox.Text);
+                        progressBar.Maximum = dataGridView.Rows.Count;
+
+                        var resource = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
+
+                        var tasks = Enumerable.Range(0, dataGridView.Rows.Count).Select(async row =>
+                        {
+                            await resource.WaitAsync();
+                            try
+                            {
+                                if (Web_upload)
+                                {
+                                    await Web_UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
+                                }
+                                else
+                                {
+                                    await Web_UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
+                                }
+                            }
+                            finally
+                            {
+                                resource.Release();
+                            }
+                        });
+
+                        await Task.WhenAll(tasks);
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("No file to update", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        UI_UnLock();
+                        return;
+                    }
+                }
+                else
                 {
                     string[] patterns = { "*.tar.gz", "*.deb", "*.sh" };
                     string[] files = patterns.SelectMany(pattern => Directory.GetFiles(Application.StartupPath, pattern, SearchOption.AllDirectories)).Distinct().OrderBy(file => Path.GetFileName(file)).ToArray();
@@ -312,39 +417,16 @@ namespace Updater_2
                             await resource.WaitAsync();
                             try
                             {
-                                //await UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
-                            }
-                            finally
-                            {
-                                resource.Release();
-                            }
-                        });
+                                if (Web_upload)
+                                {
+                                    await Web_UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
 
-                        await Task.WhenAll(tasks);
+                                }
+                                else
+                                {
+                                    await Web_UpdateFactor.MultipleFiles((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), files, row);
 
-                    }
-                    else
-                    {
-                        MessageBox.Show("No file to update", "File to update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        UI_UnLock();
-                        return;
-                    }
-                }
-                else
-                {
-                    if (filePath != "")
-                    {
-                        AddFileDataGridView(fileBox.Text);
-                        progressBar.Maximum = dataGridView.Rows.Count;
-
-                        var resource = new SemaphoreSlim(maxParallelism.Value, maxParallelism.Value);
-
-                        var tasks = Enumerable.Range(0, dataGridView.Rows.Count).Select(async row =>
-                        {
-                            await resource.WaitAsync();
-                            try
-                            {
-                                //await UpdateFactor.SingleFile((bool)dataGridView.Rows[row].Cells[0].Value, dataGridView.Rows[row].Cells["IP"].Value.ToString(), filePath, row);
+                                }
                             }
                             finally
                             {

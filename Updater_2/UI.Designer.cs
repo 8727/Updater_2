@@ -654,6 +654,7 @@
             this.Name = "UI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Updater";
+            this.Load += new System.EventHandler(this.UI_Load);
             this.auti.ResumeLayout(false);
             this.auti.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.maxParallelism)).EndInit();
