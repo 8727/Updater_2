@@ -51,9 +51,7 @@ namespace Updater_2
                 {
                     content.Add(new StreamContent(fileStream), "file", Path.GetFileName(filePath));
 
-                    using (var response = await HttpClient.PostAsync(
-                        $"http://{ipAddress}:{UI.web_port}/updater/upload",
-                        content).ConfigureAwait(false))
+                    using (var response = await HttpClient.PostAsync($"http://{ipAddress}:{UI.web_port}/updater/upload", content).ConfigureAwait(false))
                     {
                         return response.IsSuccessStatusCode;
                     }

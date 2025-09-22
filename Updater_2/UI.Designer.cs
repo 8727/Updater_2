@@ -72,6 +72,7 @@
             this.Updater2 = new System.Windows.Forms.GroupBox();
             this.Save = new System.Windows.Forms.Button();
             this.Updates = new System.Windows.Forms.Button();
+            this.logs = new System.Windows.Forms.Label();
             this.auti.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.maxParallelism)).BeginInit();
             this.RangeIP.SuspendLayout();
@@ -411,7 +412,7 @@
             this.StopIP.Name = "StopIP";
             this.StopIP.Size = new System.Drawing.Size(147, 26);
             this.StopIP.TabIndex = 3;
-            this.StopIP.Text = "10.5.127.30";
+            this.StopIP.Text = "192.168.4.133";
             this.StopIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.StopIP.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
@@ -423,7 +424,7 @@
             this.StartIP.Name = "StartIP";
             this.StartIP.Size = new System.Drawing.Size(147, 26);
             this.StartIP.TabIndex = 2;
-            this.StartIP.Text = "10.5.127.1";
+            this.StartIP.Text = "192.168.4.133";
             this.StartIP.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.StartIP.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
@@ -624,12 +625,22 @@
             this.Updates.Click += new System.EventHandler(this.Updates_Click);
             this.Updates.MouseHover += new System.EventHandler(this.UI_MouseHover);
             // 
+            // logs
+            // 
+            this.logs.AutoSize = true;
+            this.logs.Location = new System.Drawing.Point(792, 131);
+            this.logs.Name = "logs";
+            this.logs.Size = new System.Drawing.Size(35, 13);
+            this.logs.TabIndex = 40;
+            this.logs.Text = "label1";
+            // 
             // UI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(1532, 698);
+            this.Controls.Add(this.logs);
             this.Controls.Add(this.labelNumber_9);
             this.Controls.Add(this.labelNumber_8);
             this.Controls.Add(this.labelNumber_7);
@@ -710,6 +721,7 @@
         private System.Windows.Forms.DataGridView dataGridView;
         private System.Windows.Forms.GroupBox Updater2;
         private System.Windows.Forms.Button Save;
+        private System.Windows.Forms.Label logs;
     }
 }
 

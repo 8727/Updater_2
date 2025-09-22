@@ -29,6 +29,7 @@ namespace Updater_2
         public bool Web_upload = false;
 
         string filePath = string.Empty;
+
         public static Hashtable Camera = new Hashtable();
         public static int ssh_port;
         public static string ssh_username;
@@ -36,7 +37,12 @@ namespace Updater_2
         public static string web_port;
         public static bool SaveSettings;
         public static bool BoxFolder;
+        public static string tmpUploadingPath = string.Empty;
 
+        public static void Logs_label(string logs)
+        {
+            UI_Forms.logs.Text = logs;
+        }
         public static void UI_Lock()
         {
             UI_Forms.menuEnable = false;
@@ -173,8 +179,10 @@ namespace Updater_2
             }
 
             web_port = webPort.Text;
-            SaveSettings = checkSaveSettings.Checked;
+            SaveSettings = !checkSaveSettings.Checked;
             BoxFolder = checkBoxFolder.Checked;
+
+            tmpUploadingPath = $"/home/{ssh_username}/-TmpUpdate-/";
 
             return hasErrors;
         }
